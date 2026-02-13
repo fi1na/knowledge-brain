@@ -9,6 +9,7 @@ import com.knowledgebrain.entity.Note;
 import com.knowledgebrain.exception.ResourceNotFoundException;
 import com.knowledgebrain.repository.NoteRepository;
 import com.knowledgebrain.repository.NoteSearchProjection;
+import com.knowledgebrain.websocket.NoteEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -29,6 +30,7 @@ import java.util.UUID;
 public class NoteService {
 
     private final NoteRepository noteRepository;
+    private final NoteEventPublisher noteEventPublisher;
 
     @Transactional
     @Caching(evict = {
@@ -44,7 +46,10 @@ public class NoteService {
 
         Note saved = noteRepository.save(note);
         log.info("Created note {} for user {}", saved.getId(), userId);
-        return NoteResponse.from(saved);
+
+        NoteResponse response = NoteResponse.from(saved);
+        noteEventPublisher.publishCreated(userId, response);
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -89,7 +94,10 @@ public class NoteService {
 
         Note updated = noteRepository.save(note);
         log.info("Updated note {} for user {}", noteId, userId);
-        return NoteResponse.from(updated);
+
+        NoteResponse response = NoteResponse.from(updated);
+        noteEventPublisher.publishUpdated(userId, response);
+        return response;
     }
 
     @Transactional
@@ -105,6 +113,8 @@ public class NoteService {
                 });
         noteRepository.delete(note);
         log.info("Deleted note {} for user {}", noteId, userId);
+
+        noteEventPublisher.publishDeleted(userId, noteId);
     }
 
     @Transactional(readOnly = true)
