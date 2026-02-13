@@ -32,7 +32,7 @@ public class NoteService {
 
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = "notes", key = "#userId"),
+            @CacheEvict(value = "notes", allEntries = true),
             @CacheEvict(value = "noteSearch", allEntries = true)
     })
     public NoteResponse createNote(UUID userId, CreateNoteRequest request) {
@@ -70,7 +70,7 @@ public class NoteService {
 
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = "notes", key = "#userId"),
+            @CacheEvict(value = "notes", allEntries = true),
             @CacheEvict(value = "noteSearch", allEntries = true)
     })
     public NoteResponse updateNote(UUID userId, UUID noteId, UpdateNoteRequest request) {
@@ -94,7 +94,7 @@ public class NoteService {
 
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = "notes", key = "#userId"),
+            @CacheEvict(value = "notes", allEntries = true),
             @CacheEvict(value = "noteSearch", allEntries = true)
     })
     public void deleteNote(UUID userId, UUID noteId) {
